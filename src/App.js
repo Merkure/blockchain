@@ -1,25 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import "./App.css";
 
-function App() {
+const Login = () => {
+  const [token, setToken] = useState();
+
+  const handleClick = async () => {
+    if (token) {
+      window.solana.disconnect();
+      return;
+    }
+
+    try {
+      const resp = await window.solana.connect();
+      setToken(resp.publicKey.toString());
+    } catch (err) {
+      // { code: 4001, message: 'User rejected the request.' }
+    }
+  };
+
+  useEffect(() => {
+    window.solana.on("disconnect", () => {
+      setToken();
+    });
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <div>{token ? `Connected: ${token}` : "not connected"}</div>
+      <button onClick={handleClick}>{token ? "disconnect" : "connect"}</button>
     </div>
   );
+};
+
+function App() {
+  return <Login />;
 }
 
 export default App;
